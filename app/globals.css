@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #16130d;
+  --color-ink-2: #1e1a12;
+  --color-plaque: #241f15;
+  --color-line: #3a3324;
+  --color-cream: #ece3cd;
+  --color-dim: #a89c7f;
+  --color-gold: #c9a227;
+  --color-gold-2: #e6c355;
+  --color-wrong: #c0563e;
+  --color-right: #7fa650;
+  --font-display: "Songti SC", "Noto Serif SC", "STSong", Georgia, "Times New Roman", serif;
+}
+
+html {
+  background: var(--color-ink);
+  color: var(--color-cream);
+}
+
+body {
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background:
+    radial-gradient(1200px 600px at 50% -100px, rgba(201, 162, 39, 0.07), transparent),
+    var(--color-ink);
+  min-height: 100vh;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.05em;
+}
+
+.plaque {
+  background: linear-gradient(160deg, var(--color-plaque), var(--color-ink-2));
+  border: 1px solid var(--color-line);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.gold-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise-in { animation: riseIn 0.5s ease both; }
