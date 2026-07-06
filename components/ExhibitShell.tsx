@@ -1,11 +1,40 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { ExhibitDef } from "@/exhibits/types";
 import { useScore } from "@/lib/score";
 
 type Phase = "predict" | "simulate" | "revealed";
+
+const STEPS = [
+  { key: "壹", name: "押注直觉" },
+  { key: "贰", name: "亲手模拟" },
+  { key: "叁", name: "当面对质" },
+  { key: "肆", name: "听讲解" },
+];
+
+function PhaseRail({ reached }: { reached: number }) {
+  return (
+    <ol className="mb-8 flex items-center gap-0 text-xs" aria-label="参观进度">
+      {STEPS.map((s, i) => (
+        <li key={s.key} className="flex flex-1 items-center">
+          <span
+            className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border font-display transition-colors duration-500 ${
+              i <= reached ? "border-brass-2 bg-brass/20 text-brass-2" : "border-line text-dim/60"
+            }`}
+          >
+            {s.key}
+          </span>
+          <span className={`ml-2 hidden whitespace-nowrap sm:inline ${i <= reached ? "text-cream" : "text-dim/60"}`}>{s.name}</span>
+          {i < STEPS.length - 1 && (
+            <span className={`mx-2 h-px flex-1 transition-colors duration-500 sm:mx-3 ${i < reached ? "bg-brass/60" : "bg-line"}`} />
+          )}
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 export default function ExhibitShell({ def }: { def: ExhibitDef }) {
   const [phase, setPhase] = useState<Phase>("predict");
@@ -13,11 +42,18 @@ export default function ExhibitShell({ def }: { def: ExhibitDef }) {
   const [actual, setActual] = useState<string>("");
   const [openLayer, setOpenLayer] = useState<number>(0);
   const { record } = useScore();
+  const simRef = useRef<HTMLElement>(null);
+  const compareRef = useRef<HTMLElement>(null);
 
   const confirm = () => {
     if (choice === null) return;
     setPhase("simulate");
   };
+
+  useEffect(() => {
+    if (phase === "simulate") simRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (phase === "revealed") setTimeout(() => compareRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+  }, [phase]);
 
   const onFirstComplete = useCallback(
     (actualText: string) => {
@@ -34,24 +70,28 @@ export default function ExhibitShell({ def }: { def: ExhibitDef }) {
   );
 
   const correct = choice === def.correctIndex;
+  const reached = phase === "predict" ? 0 : phase === "simulate" ? 1 : 3;
 
   return (
-    <main className="mx-auto max-w-3xl px-4 pb-24 pt-8">
-      <nav className="mb-6 text-sm text-dim">
-        <Link href="/" className="hover:text-gold-2">← 返回展馆大厅</Link>
-        <span className="mx-2">·</span>
-        {def.hall} · 展品 No.{String(def.no).padStart(2, "0")}
+    <main className="mx-auto max-w-3xl px-4 pb-24 pt-7">
+      <nav className="mb-8 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-dim">
+        <Link href="/" className="transition hover:text-brass-2">← 展馆大厅</Link>
+        <span className="text-line">|</span>
+        <span className="brass-plate !py-[0.15em] font-display text-xs">{def.hall}</span>
+        <span className="font-mono text-xs tracking-widest">馆藏编号 {String(def.no).padStart(3, "0")}</span>
       </nav>
 
-      <h1 className="font-display text-3xl text-gold-2 sm:text-4xl">{def.title}</h1>
-      <div className="gold-rule my-5" />
+      <h1 className="font-display text-3xl font-bold text-cream sm:text-[2.6rem] sm:leading-tight">{def.title}</h1>
+      <hr className="brass-rule mb-7 mt-5" />
 
-      {/* 1. 预测 */}
-      <section className="plaque rounded-lg p-5 sm:p-6">
-        <h2 className="mb-1 font-display text-sm tracking-widest text-gold">壹 · 先押上你的直觉</h2>
-        <p className="mt-3 text-lg leading-relaxed">{def.question}</p>
+      <PhaseRail reached={reached} />
+
+      {/* 壹 · 预测 */}
+      <section className="panel p-5 sm:p-7">
+        <h2 className="font-display text-sm tracking-[0.3em] text-brass">壹 · 先押上你的直觉</h2>
+        <p className="mt-4 text-lg leading-relaxed text-cream">{def.question}</p>
         {def.note && <p className="mt-2 text-sm text-dim">{def.note}</p>}
-        <div className="mt-4 grid gap-2">
+        <div className="mt-5 grid gap-2.5" role="radiogroup" aria-label="你的预测">
           {def.options.map((opt, i) => {
             const chosen = choice === i;
             const locked = phase !== "predict";
@@ -60,64 +100,78 @@ export default function ExhibitShell({ def }: { def: ExhibitDef }) {
               <button
                 key={i}
                 disabled={locked}
+                role="radio"
+                aria-checked={chosen}
                 onClick={() => setChoice(i)}
-                className={`rounded border px-4 py-3 text-left transition ${
-                  chosen ? "border-gold bg-gold/10 text-cream" : "border-line text-dim hover:border-gold/50 hover:text-cream"
-                } ${locked ? "cursor-default" : ""}`}
+                className={`rounded-[3px] border px-4 py-3 text-left transition-all duration-150 ${
+                  chosen
+                    ? "border-brass-2 bg-brass/10 text-cream shadow-[inset_0_0_0_1px_var(--color-brass)]"
+                    : "border-line text-dim"
+                } ${locked ? "cursor-default" : "hover:border-brass/70 hover:bg-brass/5 hover:text-cream active:translate-y-px"}`}
               >
                 {opt}
-                {showMark && i === def.correctIndex && <span className="ml-2 text-right text-sm text-right" style={{ color: "var(--color-right)" }}>✓ 事实如此</span>}
-                {showMark && chosen && i !== def.correctIndex && <span className="ml-2 text-sm" style={{ color: "var(--color-wrong)" }}>✗ 你的直觉</span>}
+                {showMark && i === def.correctIndex && (
+                  <span className="ml-2 text-sm" style={{ color: "var(--color-right)" }}>✓ 事实如此</span>
+                )}
+                {showMark && chosen && i !== def.correctIndex && (
+                  <span className="ml-2 text-sm" style={{ color: "var(--color-wrong)" }}>✗ 你的直觉</span>
+                )}
               </button>
             );
           })}
         </div>
-        {phase === "predict" && (
+        {phase === "predict" ? (
           <button
             onClick={confirm}
             disabled={choice === null}
-            className="mt-4 rounded bg-gold px-6 py-2 font-display text-ink transition hover:bg-gold-2 disabled:opacity-30"
+            className="brass-plate mt-5 font-display text-base transition active:translate-y-px disabled:cursor-not-allowed disabled:opacity-35"
           >
-            就赌这个
+            落子无悔,就赌这个
           </button>
-        )}
-        {phase !== "predict" && choice !== null && (
-          <p className="mt-3 text-sm text-dim">已记录你的预测:「{def.options[choice]}」。现在,亲手验证它。</p>
+        ) : (
+          choice !== null && (
+            <p className="mt-4 text-sm text-dim">已封存你的预测:「{def.options[choice]}」。现在,亲手验证它。</p>
+          )
         )}
       </section>
 
-      {/* 2. 模拟 */}
+      {/* 贰 · 模拟 */}
       {phase !== "predict" && (
-        <section className="plaque rise-in mt-6 rounded-lg p-5 sm:p-6">
-          <h2 className="mb-4 font-display text-sm tracking-widest text-gold">贰 · 亲手跑一遍现实</h2>
+        <section ref={simRef} className="panel rise-in mt-6 scroll-mt-6 p-5 sm:p-7">
+          <h2 className="mb-5 font-display text-sm tracking-[0.3em] text-brass">贰 · 亲手跑一遍现实</h2>
           <def.Simulator onFirstComplete={onFirstComplete} />
         </section>
       )}
 
-      {/* 3. 对比 */}
+      {/* 叁 · 对比 */}
       {phase === "revealed" && (
-        <section className="plaque rise-in mt-6 rounded-lg p-5 sm:p-6">
-          <h2 className="mb-4 font-display text-sm tracking-widest text-gold">叁 · 你猜的 vs 实际发生的</h2>
+        <section ref={compareRef} className="panel rise-in mt-6 scroll-mt-6 p-5 sm:p-7">
+          <h2 className="mb-5 font-display text-sm tracking-[0.3em] text-brass">叁 · 你猜的 vs 实际发生的</h2>
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded border px-4 py-3" style={{ borderColor: correct ? "var(--color-right)" : "var(--color-wrong)" }}>
+            <div className="rounded-[3px] border border-line bg-black/20 px-4 py-3">
               <div className="text-xs text-dim">你猜的</div>
-              <div className="mt-1">{choice !== null ? def.options[choice] : "—"}</div>
+              <div className="mt-1 text-cream">{choice !== null ? def.options[choice] : "—"}</div>
             </div>
-            <div className="rounded border border-gold/50 px-4 py-3">
+            <div className="rounded-[3px] border border-brass/50 bg-brass/5 px-4 py-3">
               <div className="text-xs text-dim">实际发生的</div>
-              <div className="mt-1">{actual}</div>
+              <div className="mt-1 text-cream">{actual}</div>
             </div>
           </div>
-          <p className="mt-4 font-display text-lg" style={{ color: correct ? "var(--color-right)" : "var(--color-wrong)" }}>
-            {correct ? "✓ 你的直觉这次站住了脚。这在本馆并不常见。" : "✗ 直觉又输了一局——别难过,几乎所有人都在这里翻车。"}
-          </p>
+          <div className="mt-6 flex items-center gap-4">
+            <span className="seal seal--stamp text-[13px]">{correct ? "直觉不虚" : "直觉已碎"}</span>
+            <p className="text-sm leading-relaxed text-dim">
+              {correct
+                ? "本馆为你的直觉盖章存档。能从这里全身而退的参观者,一只手数得过来。"
+                : "别难过——本馆的每件藏品,都是用无数聪明人的这一下换来的。"}
+            </p>
+          </div>
         </section>
       )}
 
-      {/* 4. 解释 */}
+      {/* 肆 · 解释 */}
       {phase === "revealed" && (
-        <section className="plaque rise-in mt-6 rounded-lg p-5 sm:p-6">
-          <h2 className="mb-4 font-display text-sm tracking-widest text-gold">肆 · 讲解员时间</h2>
+        <section className="panel rise-in mt-6 p-5 sm:p-7">
+          <h2 className="mb-4 font-display text-sm tracking-[0.3em] text-brass">肆 · 讲解员时间</h2>
           {[
             { t: "一句话直觉版", c: def.explanation.intuition },
             { t: "数学原理版", c: def.explanation.math },
@@ -126,16 +180,19 @@ export default function ExhibitShell({ def }: { def: ExhibitDef }) {
             <div key={i} className="border-b border-line last:border-0">
               <button
                 onClick={() => setOpenLayer(openLayer === i ? -1 : i)}
-                className="flex w-full items-center justify-between py-3 text-left font-display text-cream hover:text-gold-2"
+                aria-expanded={openLayer === i}
+                className="flex w-full items-center justify-between py-3.5 text-left font-display text-cream transition hover:text-brass-2"
               >
                 {l.t}
-                <span className="text-dim">{openLayer === i ? "−" : "+"}</span>
+                <span className="text-dim" aria-hidden>{openLayer === i ? "−" : "+"}</span>
               </button>
-              {openLayer === i && <div className="rise-in pb-4 leading-relaxed text-cream/90">{l.c}</div>}
+              {openLayer === i && <div className="rise-in pb-5 leading-relaxed text-cream/90">{l.c}</div>}
             </div>
           ))}
-          <div className="mt-6 text-center">
-            <Link href="/" className="font-display text-gold hover:text-gold-2">→ 回大厅,看看下一件展品</Link>
+          <div className="mt-7 text-center">
+            <Link href="/" className="font-display text-brass transition hover:text-brass-2">
+              → 回大厅,看看下一件藏品
+            </Link>
           </div>
         </section>
       )}

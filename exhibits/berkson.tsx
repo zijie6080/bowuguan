@@ -14,7 +14,7 @@ function Scatter({ pts, highlight }: { pts: [number, number][]; highlight?: bool
     <svg viewBox="0 0 100 100" className="aspect-square w-full rounded bg-black/40">
       <line x1={BERKSON_THRESHOLD * 100 - 100} y1="0" x2="100" y2={BERKSON_THRESHOLD * 100 - 100} stroke="var(--color-line)" strokeDasharray="3 3" transform="scale(1,-1) translate(0,-100)" />
       {pts.slice(0, 500).map((p, i) => (
-        <circle key={i} cx={p[0] * 100} cy={100 - p[1] * 100} r="0.9" fill={highlight ? "var(--color-gold)" : "var(--color-dim)"} opacity="0.6" />
+        <circle key={i} cx={p[0] * 100} cy={100 - p[1] * 100} r="0.9" fill={highlight ? "var(--color-brass-2)" : "var(--color-dim)"} opacity="0.6" />
       ))}
     </svg>
   );

@@ -58,7 +58,7 @@ function Simulator({ onFirstComplete }: SimulatorProps) {
             <BarRow label={`B 疗法(${s.large.bTreated} 人)`} frac={rate(s.large.bSuccess, s.large.bTreated)} text={fmtPct(rate(s.large.bSuccess, s.large.bTreated))} color="var(--color-dim)" />
           </div>
           <div>
-            <div className="mb-2 text-sm" style={{ color: "var(--color-gold-2)" }}>全部病人合计</div>
+            <div className="mb-2 text-sm" style={{ color: "var(--color-brass-2)" }}>全部病人合计</div>
             <BarRow label="A 疗法" frac={aAll} text={fmtPct(aAll)} />
             <BarRow label="B 疗法" frac={bAll} text={fmtPct(bAll)} color="var(--color-dim)" />
           </div>

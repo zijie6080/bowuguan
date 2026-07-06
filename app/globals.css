@@ -1,50 +1,157 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #16130d;
-  --color-ink-2: #1e1a12;
-  --color-plaque: #241f15;
-  --color-line: #3a3324;
-  --color-cream: #ece3cd;
-  --color-dim: #a89c7f;
-  --color-gold: #c9a227;
-  --color-gold-2: #e6c355;
-  --color-wrong: #c0563e;
-  --color-right: #7fa650;
-  --font-display: "Songti SC", "Noto Serif SC", "STSong", Georgia, "Times New Roman", serif;
+  /* 深夜展厅:墨绿墙面 / 象牙展签 / 黄铜 / 朱砂印 */
+  --color-wall: #1b241f;
+  --color-wall-2: #151c18;
+  --color-panel: #212b25;
+  --color-line: #35423a;
+  --color-cream: #e9e2cf;
+  --color-dim: #97a196;
+  --color-brass: #a8873c;
+  --color-brass-2: #d4b36a;
+  --color-paper: #ede4cd;
+  --color-paper-2: #e3d7ba;
+  --color-ink: #2a2620;
+  --color-ink-soft: #6b6353;
+  --color-seal: #a03126;
+  --color-right: #6f9457;
+  --color-wrong: #b3543c;
+  --font-display: "Songti SC", "Noto Serif SC", "STSong", "SimSun", Georgia, serif;
 }
 
 html {
-  background: var(--color-ink);
+  background: var(--color-wall);
   color: var(--color-cream);
+  scroll-behavior: smooth;
 }
 
 body {
   font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   background:
-    radial-gradient(1200px 600px at 50% -100px, rgba(201, 162, 39, 0.07), transparent),
-    var(--color-ink);
+    /* 顶部一盏射灯 */
+    radial-gradient(1100px 480px at 50% -160px, rgba(212, 179, 106, 0.10), transparent 70%),
+    /* 墙面织物质感:两组交叉的细密纹理 */
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.05) 2px 3px),
+    repeating-linear-gradient(90deg, transparent 0 2px, rgba(255, 255, 255, 0.012) 2px 3px),
+    linear-gradient(180deg, var(--color-wall) 0%, var(--color-wall-2) 100%);
+  background-attachment: fixed;
   min-height: 100vh;
 }
 
 .font-display {
   font-family: var(--font-display);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
-.plaque {
-  background: linear-gradient(160deg, var(--color-plaque), var(--color-ink-2));
+/* ── 墙上的展签(象牙纸) ─────────────────────────── */
+.label-card {
+  position: relative;
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.5), transparent 40%),
+    repeating-linear-gradient(-45deg, transparent 0 3px, rgba(120, 100, 60, 0.03) 3px 4px),
+    linear-gradient(180deg, var(--color-paper), var(--color-paper-2));
+  color: var(--color-ink);
+  border-radius: 2px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 8px 18px -6px rgba(0, 0, 0, 0.55);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.label-card::after {
+  /* 黄铜钉 */
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e8cd8a, var(--color-brass) 60%, #6e5722);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+a.label-card:hover,
+a.label-card:focus-visible {
+  transform: translateY(-3px) rotate(-0.4deg);
+  box-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.45),
+    0 18px 30px -8px rgba(0, 0, 0, 0.6);
+}
+
+/* ── 展厅内深色说明板 ─────────────────────────────── */
+.panel {
+  background: linear-gradient(165deg, var(--color-panel), rgba(21, 28, 24, 0.9));
   border: 1px solid var(--color-line);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
-.gold-rule {
+/* ── 黄铜门牌 ────────────────────────────────────── */
+.brass-plate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.35em 1.1em;
+  background: linear-gradient(175deg, #c3a258, #8a6d2c 55%, #a8873c);
+  color: #241d0d;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 246, 220, 0.55),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 0 rgba(255, 246, 220, 0.35);
+}
+
+.brass-rule {
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+  border: 0;
+  background: linear-gradient(90deg, transparent, rgba(212, 179, 106, 0.55) 20%, rgba(212, 179, 106, 0.55) 80%, transparent);
 }
 
+/* ── 朱砂印章 ────────────────────────────────────── */
+.seal {
+  display: inline-grid;
+  place-items: center;
+  width: 3.4em;
+  height: 3.4em;
+  border: 2px solid var(--color-seal);
+  border-radius: 4px;
+  color: var(--color-seal);
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  transform: rotate(-8deg);
+  background:
+    radial-gradient(circle at 30% 40%, rgba(160, 49, 38, 0.16), transparent 70%);
+  box-shadow: inset 0 0 0 1px rgba(160, 49, 38, 0.25);
+  mask-image: radial-gradient(circle at 50% 50%, black 92%, transparent 100%);
+}
+.seal--stamp {
+  animation: stampIn 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  animation-delay: 0.35s;
+}
+@keyframes stampIn {
+  0% { opacity: 0; transform: rotate(-8deg) scale(2.2); }
+  60% { opacity: 1; transform: rotate(-8deg) scale(0.92); }
+  100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+}
+
+/* ── 入场动画 ────────────────────────────────────── */
 @keyframes riseIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.rise-in { animation: riseIn 0.5s ease both; }
+.rise-in { animation: riseIn 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+
+/* 键盘焦点 */
+:focus-visible {
+  outline: 2px solid var(--color-brass-2);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .rise-in, .seal--stamp { animation: none; }
+  .label-card, a.label-card:hover { transition: none; transform: none; }
+}
